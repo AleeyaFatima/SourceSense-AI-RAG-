@@ -24,6 +24,10 @@ _reranker_model = None
 
 def get_reranker_model():
     global _reranker_model
+    import os
+    # Disable heavy local ML model on memory-constrained Render free tier
+    if os.environ.get("ENV") == "production":
+        return None
     if settings.RERANKER_PROVIDER == "none" or CrossEncoder is None:
         return None
     if _reranker_model is None:

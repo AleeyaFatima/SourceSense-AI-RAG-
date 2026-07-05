@@ -38,6 +38,9 @@ _embedding_model = None
 
 def get_embedding_model():
     global _embedding_model
+    # Disable heavy local ML model on memory-constrained Render free tier
+    if os.environ.get("ENV") == "production":
+        return None
     if settings.EMBEDDING_PROVIDER == "openai":
         return None
     if SentenceTransformer is None:
