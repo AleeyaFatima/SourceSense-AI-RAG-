@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #050505;
+  --bg-card: #101010;
+  --bg-surface: #181818;
+  --border-color: #222222;
+  --gold: #D4AF37;
+  --gold-hover: #F7C948;
+  --gold-muted: #8C6A1D;
+  --text-primary: #F5F5F5;
+  --text-muted: #9CA3AF;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #EF4444;
+}
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-surface: var(--bg-surface);
+  --color-border-custom: var(--border-color);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-gold-muted: var(--gold-muted);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-success-custom: var(--success);
+  --color-warning-custom: var(--warning);
+  --color-error-custom: var(--error);
+  
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
+  --font-display: var(--font-plus-jakarta), ui-sans-serif, system-ui;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-muted);
+}
+
+/* Glassmorphism utility */
+.glass-card {
+  background: rgba(16, 16, 16, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.08);
+}
+
+/* Gold glowing indicators */
+.gold-glow {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.12);
+}
+
+.gold-glow-border {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
+}
+
+/* Premium ambient grid background */
+.bg-grid {
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(212, 175, 55, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(212, 175, 55, 0.015) 1px, transparent 1px);
+}
+
+/* Radial golden gradient backdrop */
+.ambient-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(140, 106, 29, 0.08) 0%, transparent 65%);
+}
+
+/* Keyframes for OS micro-animations */
+@keyframes pulse-gold {
+  0%, 100% {
+    opacity: 0.5;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 3s infinite;
+}
+
+/* Markdown parsing custom rules */
+.prose {
+  color: var(--text-primary);
+  font-size: 0.925rem;
+  line-height: 1.6;
+}
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.prose h1 { font-size: 1.4rem; }
+.prose h2 { font-size: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.25rem; }
+.prose h3 { font-size: 1.05rem; }
+.prose p { margin-bottom: 0.75rem; }
+.prose ul, .prose ol { margin-bottom: 0.75rem; padding-left: 1.15rem; }
+.prose ul { list-style-type: disc; }
+.prose ol { list-style-type: decimal; }
+.prose li { margin-bottom: 0.25rem; }
+.prose code {
+  font-family: var(--font-mono);
+  background: var(--bg-surface);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--gold);
+}
+.prose pre {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+}
+.prose pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--text-primary);
+}
+
+/* Citation markers highlighting styles */
+.citation-marker {
+  font-family: var(--font-mono);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(24, 24, 24, 0.8);
+  color: var(--gold);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  font-size: 0.725rem;
+  font-weight: 600;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 0.25rem;
+  margin-left: 0.125rem;
+  margin-right: 0.125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+.citation-marker:hover, .citation-marker.highlighted {
+  background: var(--gold);
+  color: var(--bg-primary);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Hide scrollbar classes */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
