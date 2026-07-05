@@ -57,7 +57,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-bg-card border-r border-border-custom flex flex-col h-screen fixed left-0 top-0 z-20">
+    <aside className="w-full h-full flex flex-col">
       {/* Header / Logo */}
       <div className="p-6 border-b border-border-custom flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-gold/10 border border-gold flex items-center justify-center animate-pulse-gold">

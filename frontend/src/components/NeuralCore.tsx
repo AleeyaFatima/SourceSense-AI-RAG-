@@ -46,8 +46,8 @@ export default function NeuralCore({ activeStage }: { activeStage: string | null
     };
     window.addEventListener("resize", handleResize);
 
-    // 1. Generate 3D sphere nodes
-    const nodes: Node3D[] = [];
+    // 1. Generate 3D sphere nodes (Keep original static references)
+    const originalNodes: Node3D[] = [];
     const labels = [
       "Lexical Index", "Semantic Vectors", "Hybrid DB", "RRF Merger", "Cross-Encoder", 
       "LLM Generator", "Citation Audit", "Neon PostgreSQL", "Qdrant Cloud", "RAGAS Engine", 
@@ -59,11 +59,10 @@ export default function NeuralCore({ activeStage }: { activeStage: string | null
     const radius = Math.min(width, height) * 0.35;
 
     for (let i = 0; i < numNodes; i++) {
-      // Golden spiral distribution on sphere
       const phi = Math.acos(-1 + (2 * i) / numNodes);
       const theta = Math.sqrt(numNodes * Math.PI) * phi;
       
-      nodes.push({
+      originalNodes.push({
         x: radius * Math.sin(phi) * Math.cos(theta),
         y: radius * Math.sin(phi) * Math.sin(theta),
         z: radius * Math.cos(phi),
@@ -73,60 +72,52 @@ export default function NeuralCore({ activeStage }: { activeStage: string | null
     }
 
     // 2. Generate random background golden dust particles
-    const particles: Particle3D[] = [];
+    const originalParticles: Particle3D[] = [];
     const numParticles = 60;
     for (let i = 0; i < numParticles; i++) {
-      particles.push({
+      originalParticles.push({
         x: (Math.random() - 0.5) * width * 1.5,
         y: (Math.random() - 0.5) * height * 1.5,
         z: (Math.random() - 0.5) * radius * 2,
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: (Math.random() - 0.5) * 0.2,
-        vz: (Math.random() - 0.5) * 0.2
+        vx: (Math.random() - 0.5) * 0.1,
+        vy: (Math.random() - 0.5) * 0.1,
+        vz: (Math.random() - 0.5) * 0.1
       });
     }
 
-    // Rotations variables
-    let angleX = 0.002;
-    let angleY = 0.003;
+    // Cumulative rotations variables (No mutation on originals)
+    let rotX = 0;
+    let rotY = 0;
     
-    // Track mouse movement
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.clientX - rect.left;
       const clientY = e.clientY - rect.top;
-      
-      // Calculate coordinates relative to center
-      mouseRef.current.targetX = (clientX - width / 2) * 0.003;
-      mouseRef.current.targetY = (clientY - height / 2) * 0.003;
+      mouseRef.current.targetX = (clientX - width / 2) * 0.002;
+      mouseRef.current.targetY = (clientY - height / 2) * 0.002;
     };
     canvas.addEventListener("mousemove", handleMouseMove);
 
-    // Flow path variables for active query animation
     let flowProgress = 0;
-    const stagesFlow = ["Embed", "Dense Search", "BM25 Search", "RRF Fusion", "Reranker", "LLM Generate", "Verify"];
 
-    // Main animation loop
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth mouse tracking (LERP)
       const mouse = mouseRef.current;
-      mouse.x += (mouse.targetX - mouse.x) * 0.08;
-      mouse.y += (mouse.targetY - mouse.y) * 0.08;
+      mouse.x += (mouse.targetX - mouse.x) * 0.05;
+      mouse.y += (mouse.targetY - mouse.y) * 0.05;
 
-      // Apply 3D Rotations
-      // Combine automatic slow rotation + mouse offset rotation
-      const currentAngleX = angleX + mouse.y * 0.05;
-      const currentAngleY = angleY + mouse.x * 0.05;
+      // Update rotation angles continuously
+      rotX += 0.0025 + mouse.y * 0.02;
+      rotY += 0.0035 + mouse.x * 0.02;
 
-      const cosX = Math.cos(currentAngleX);
-      const sinX = Math.sin(currentAngleX);
-      const cosY = Math.cos(currentAngleY);
-      const sinY = Math.sin(currentAngleY);
+      const cosX = Math.cos(rotX);
+      const sinX = Math.sin(rotX);
+      const cosY = Math.cos(rotY);
+      const sinY = Math.sin(rotY);
 
-      // Rotate and project nodes
-      const projectedNodes = nodes.map(node => {
+      // Rotate nodes based on static original values
+      const projectedNodes = originalNodes.map(node => {
         // Rotate Y
         let x1 = node.x * cosY - node.z * sinY;
         let z1 = node.z * cosY + node.x * sinY;
@@ -135,12 +126,6 @@ export default function NeuralCore({ activeStage }: { activeStage: string | null
         let y2 = node.y * cosX - z1 * sinX;
         let z2 = z1 * cosX + node.y * sinX;
 
-        // Keep rotated coordinates back in object for subsequent frames
-        node.x = x1;
-        node.y = y2;
-        node.z = z2;
-
-        // Perspective projection parameters
         const fov = 350;
         const scale = fov / (fov + z2);
         const projX = width / 2 + x1 * scale;
@@ -151,28 +136,29 @@ export default function NeuralCore({ activeStage }: { activeStage: string | null
           projY,
           scale,
           z: z2,
+          xRotated: x1,
+          yRotated: y2,
           label: node.label,
           color: node.color
         };
       });
 
-      // Draw background particles (floating gold dust)
-      ctx.fillStyle = "rgba(212, 175, 55, 0.25)";
-      particles.forEach(p => {
-        // Apply rotation
+      // Draw background particles
+      ctx.fillStyle = "rgba(212, 175, 55, 0.2)";
+      originalParticles.forEach(p => {
+        // Update raw positions in original particles
+        p.x += p.vx;
+        p.y += p.vy;
+        p.z += p.vz;
+
+        if (Math.abs(p.x) > width) p.x = -p.x;
+        if (Math.abs(p.y) > height) p.y = -p.y;
+
+        // Apply rotation for projection
         let x1 = p.x * cosY - p.z * sinY;
         let z1 = p.z * cosY + p.x * sinY;
         let y2 = p.y * cosX - z1 * sinX;
         let z2 = z1 * cosX + p.y * sinX;
-
-        // Update positions slowly
-        p.x = x1 + p.vx;
-        p.y = y2 + p.vy;
-        p.z = z2 + p.vz;
-
-        // Wrap around boundaries
-        if (Math.abs(p.x) > width) p.x = -p.x;
-        if (Math.abs(p.y) > height) p.y = -p.y;
 
         const fov = 350;
         const scale = fov / (fov + z2);
@@ -181,27 +167,24 @@ export default function NeuralCore({ activeStage }: { activeStage: string | null
 
         if (px >= 0 && px <= width && py >= 0 && py <= height) {
           ctx.beginPath();
-          ctx.arc(px, py, scale * 0.8, 0, Math.PI * 2);
+          ctx.arc(px, py, scale * 0.7, 0, Math.PI * 2);
           ctx.fill();
         }
       });
 
-      // Draw connections (thin golden web lines)
+      // Draw connections
       ctx.lineWidth = 0.5;
       for (let i = 0; i < projectedNodes.length; i++) {
         for (let j = i + 1; j < projectedNodes.length; j++) {
           const n1 = projectedNodes[i];
           const n2 = projectedNodes[j];
           
-          // Calculate distance in 3D rotated space
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const dz = nodes[i].z - nodes[j].z;
+          const dx = n1.xRotated - n2.xRotated;
+          const dy = n1.yRotated - n2.yRotated;
+          const dz = n1.z - n2.z;
           const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
           
-          // Connect close nodes
           if (dist < radius * 0.8) {
-            // Lines are more transparent if nodes are farther away in z
             const avgZ = (n1.z + n2.z) / 2;
             const alpha = Math.max(0, 0.15 * (1 - dist / (radius * 0.8)) * (1 - avgZ / (radius * 2)));
             

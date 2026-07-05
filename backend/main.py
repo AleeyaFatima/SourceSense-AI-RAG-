@@ -40,56 +40,63 @@ def on_startup():
     # Create DB tables
     init_db()
     
-    # Pre-load default admin user for easy demo login
-    with Session(engine) as session:
-        admin = session.exec(select(User).where(User.email == "admin@sourcesense.ai")).first()
-        if not admin:
-            admin = User(
-                email="admin@sourcesense.ai",
-                name="Default Administrator",
-                hashed_password=get_password_hash("password123")
-            )
-            session.add(admin)
-            session.commit()
-            session.refresh(admin)
-            print("Created default admin user: admin@sourcesense.ai / password123")
-            
-        # Auto-ingest sample files if there are no documents in the database
-        doc_count = len(session.exec(select(Document)).all())
-        if doc_count == 0:
-            print("Auto-ingestion check: No documents found. Ingesting samples...")
-            samples_dir = "./data/samples"
-            uploads_dir = "./data/uploads"
-            os.makedirs(uploads_dir, exist_ok=True)
-            
-            if os.path.exists(samples_dir):
-                sample_files = [f for f in os.listdir(samples_dir) if f.endswith((".md", ".txt"))]
-                for file_name in sample_files:
-                    src_path = os.path.join(samples_dir, file_name)
-                    dest_path = os.path.join(uploads_dir, f"startup_{file_name}")
-                    
-                    try:
-                        shutil.copy2(src_path, dest_path)
-                        title = file_name.rsplit(".", 1)[0].replace("_", " ").title()
-                        ext = file_name.rsplit(".", 1)[1]
+    # Include import for background thread
+    import threading
+
+    def bg_startup_task():
+        # Pre-load default admin user for easy demo login
+        with Session(engine) as session:
+            admin = session.exec(select(User).where(User.email == "admin@sourcesense.ai")).first()
+            if not admin:
+                admin = User(
+                    email="admin@sourcesense.ai",
+                    name="Default Administrator",
+                    hashed_password=get_password_hash("password123")
+                )
+                session.add(admin)
+                session.commit()
+                session.refresh(admin)
+                print("Created default admin user: admin@sourcesense.ai / password123")
+                
+            # Auto-ingest sample files if there are no documents in the database
+            doc_count = len(session.exec(select(Document)).all())
+            if doc_count == 0:
+                print("Auto-ingestion check: No documents found. Ingesting samples...")
+                samples_dir = "./data/samples"
+                uploads_dir = "./data/uploads"
+                os.makedirs(uploads_dir, exist_ok=True)
+                
+                if os.path.exists(samples_dir):
+                    sample_files = [f for f in os.listdir(samples_dir) if f.endswith((".md", ".txt"))]
+                    for file_name in sample_files:
+                        src_path = os.path.join(samples_dir, file_name)
+                        dest_path = os.path.join(uploads_dir, f"startup_{file_name}")
                         
-                        db_doc = Document(
-                            user_id=admin.id,
-                            title=title,
-                            file_type=ext,
-                            file_path=dest_path,
-                            status="processing"
-                        )
-                        session.add(db_doc)
-                        session.commit()
-                        session.refresh(db_doc)
-                        
-                        print(f"Indexing sample: {title} (ID: {db_doc.id})...")
-                        # Run indexer synchronously for startup
-                        process_and_index_document(session, db_doc.id)
-                        
-                    except Exception as e:
-                        print(f"Failed to auto-ingest sample {file_name}: {e}")
+                        try:
+                            shutil.copy2(src_path, dest_path)
+                            title = file_name.rsplit(".", 1)[0].replace("_", " ").title()
+                            ext = file_name.rsplit(".", 1)[1]
+                            
+                            db_doc = Document(
+                                user_id=admin.id,
+                                title=title,
+                                file_type=ext,
+                                file_path=dest_path,
+                                status="processing"
+                            )
+                            session.add(db_doc)
+                            session.commit()
+                            session.refresh(db_doc)
+                            
+                            print(f"Indexing sample: {title} (ID: {db_doc.id})...")
+                            # Run indexer
+                            process_and_index_document(session, db_doc.id)
+                            
+                        except Exception as e:
+                            print(f"Failed to auto-ingest sample {file_name}: {e}")
+
+    # Spin up background thread for model download and document pre-seeding
+    threading.Thread(target=bg_startup_task, daemon=True).start()
 
 @app.get("/")
 def read_root():

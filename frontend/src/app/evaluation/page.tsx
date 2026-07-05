@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
   BarChart as RechartsBarChart, 
   Bar, 
@@ -25,7 +26,8 @@ import {
   AlertTriangle,
   RefreshCw,
   TrendingUp,
-  Brain
+  Brain,
+  Scroll
 } from "lucide-react";
 
 import DashboardLayout from "@/components/DashboardLayout";
@@ -125,7 +127,18 @@ const MOCK_CONFIDENCE_HISTORY = [
   { name: "Q10", Confidence: 95 }
 ];
 
-export default function EvaluationAnalytics() {
+const MOCK_AUDITS = [
+  { timestamp: "09:30 UTC", query: "Explain Rank Fusion formula", faithfulness: "96%", precision: "94%", status: "Verified" },
+  { timestamp: "09:42 UTC", query: "Database retention SLAs", faithfulness: "92%", precision: "90%", status: "Verified" },
+  { timestamp: "10:11 UTC", query: "Who designed the system?", faithfulness: "98%", precision: "98%", status: "Verified" },
+  { timestamp: "10:25 UTC", query: "Authentication parameters config", faithfulness: "94%", precision: "92%", status: "Verified" },
+  { timestamp: "10:47 UTC", query: "How to reset passwords?", faithfulness: "89%", precision: "88%", status: "Verified" }
+];
+
+function EvaluationContent() {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
+
   const [loading, setLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
   
@@ -179,10 +192,10 @@ export default function EvaluationAnalytics() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="font-display font-bold text-2xl tracking-tight text-text-primary">
-              Evaluation & Observability
+              {tab === "analytics" ? "RAG Performance Charts" : tab === "audit" ? "Observability Audit Logs" : "RAGAS Quality Evaluations"}
             </h2>
             <p className="text-text-muted mt-1 text-xs uppercase font-mono tracking-wider">
-              NLI Faithfulness & Citation Verification Metrics
+              {tab === "analytics" ? "Latency & Traffic distribution charts" : tab === "audit" ? "Platform query execution histories" : "NLI Faithfulness & Citation Verification Metrics"}
             </p>
           </div>
           
@@ -203,146 +216,190 @@ export default function EvaluationAnalytics() {
           </div>
         </div>
 
-        {/* Circular Gauges Row */}
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-32 rounded-2xl bg-bg-card border border-border-custom animate-pulse" />
-            ))}
+        {/* Tab Routing */}
+        {tab === "analytics" ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Latency histogram */}
+            <div className="p-6 rounded-2xl bg-bg-card border border-border-custom space-y-4">
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5 font-display">
+                <Clock className="w-3.5 h-3.5 text-gold" />
+                Retrieval Latency Distribution
+              </h3>
+              
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsBarChart data={latencyDist} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#181818" />
+                    <XAxis dataKey="range" stroke="#9CA3AF" fontSize={9} tickLine={false} />
+                    <YAxis stroke="#9CA3AF" fontSize={9} tickLine={false} />
+                    <RechartsTooltip
+                      contentStyle={{ background: "#101010", border: "1px solid #222222", borderRadius: "8px" }}
+                      labelStyle={{ color: "#9CA3AF", fontSize: "10px" }}
+                      itemStyle={{ color: "#D4AF37", fontSize: "10px" }}
+                    />
+                    <Bar dataKey="Count" fill="#D4AF37" radius={[4, 4, 0, 0]}>
+                      {latencyDist.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === 1 ? "#F7C948" : "#8C6A1D"} />
+                      ))}
+                    </Bar>
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Queries volume trend */}
+            <div className="p-6 rounded-2xl bg-bg-card border border-border-custom space-y-4">
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5 font-display">
+                <TrendingUp className="w-3.5 h-3.5 text-gold" />
+                Daily Query Traffic
+              </h3>
+              
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={queriesPerDay} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#181818" />
+                    <XAxis dataKey="date" stroke="#9CA3AF" fontSize={9} tickLine={false} />
+                    <YAxis stroke="#9CA3AF" fontSize={9} tickLine={false} />
+                    <RechartsTooltip
+                      contentStyle={{ background: "#101010", border: "1px solid #222222", borderRadius: "8px" }}
+                      labelStyle={{ color: "#9CA3AF", fontSize: "10px" }}
+                      itemStyle={{ color: "#D4AF37", fontSize: "10px" }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="Queries" 
+                      stroke="#D4AF37" 
+                      strokeWidth={2}
+                      dot={{ stroke: "#D4AF37", strokeWidth: 1, r: 2 }}
+                      activeDot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        ) : tab === "audit" ? (
+          <div className="p-6 rounded-2xl bg-bg-card border border-border-custom space-y-4">
+            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5 font-display">
+              <Scroll className="w-3.5 h-3.5 text-gold" />
+              Query Observation Audit Logs
+            </h3>
+            
+            <div className="overflow-x-auto w-full no-scrollbar">
+              <table className="w-full text-left border-collapse text-[11px]">
+                <thead>
+                  <tr className="border-b border-border-custom/80 text-text-muted uppercase text-[9px] font-mono">
+                    <th className="py-3 px-4">Timestamp</th>
+                    <th className="py-3 px-4">Query</th>
+                    <th className="py-3 px-4">Faithfulness</th>
+                    <th className="py-3 px-4">Context Precision</th>
+                    <th className="py-3 px-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-custom/40">
+                  {MOCK_AUDITS.map((audit, idx) => (
+                    <tr key={idx} className="hover:bg-bg-surface/30">
+                      <td className="py-3 px-4 font-mono text-text-muted">{audit.timestamp}</td>
+                      <td className="py-3 px-4 text-text-primary font-semibold">{audit.query}</td>
+                      <td className="py-3 px-4 text-gold font-mono">{audit.faithfulness}</td>
+                      <td className="py-3 px-4 font-mono">{audit.precision}</td>
+                      <td className="py-3 px-4 text-success-custom font-bold">{audit.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
-          <div className="flex flex-wrap gap-4 items-stretch">
-            <CircularGauge 
-              value={Math.round(scores.faithfulness * 100)} 
-              label="Faithfulness" 
-              color="#D4AF37" 
-            />
-            <CircularGauge 
-              value={Math.round(scores.answer_relevance * 100)} 
-              label="Answer Correctness" 
-              color="#F7C948" 
-            />
-            <CircularGauge 
-              value={Math.round(scores.retrieval_precision * 100)} 
-              label="Context Precision" 
-              color="#8C6A1D" 
-            />
-            <CircularGauge 
-              value={Math.round(scores.citation_accuracy * 100)} 
-              label="Citation Accuracy" 
-              color="#22C55E" 
-            />
-            {/* Hallucination Rate Gauge */}
-            <div className="flex flex-col items-center gap-3 bg-bg-card p-5 rounded-2xl border border-border-custom hover:border-gold/20 transition-all flex-1 min-w-[130px]">
-              <div className="relative w-[100px] h-[100px]">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="46"
-                    stroke="rgba(24, 24, 24, 0.8)"
-                    strokeWidth="8"
-                    fill="transparent"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="46"
-                    stroke="#EF4444"
-                    strokeWidth="8"
-                    fill="transparent"
-                    strokeDasharray={289}
-                    strokeDashoffset={289 - (scores.hallucination_rate / 100) * 289}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center font-mono font-bold text-sm text-error-custom">
-                  {scores.hallucination_rate}%
+          <>
+            {/* Circular Gauges Row */}
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="h-32 rounded-2xl bg-bg-card border border-border-custom animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-4 items-stretch">
+                <CircularGauge 
+                  value={Math.round(scores.faithfulness * 100)} 
+                  label="Faithfulness" 
+                  color="#D4AF37" 
+                />
+                <CircularGauge 
+                  value={Math.round(scores.answer_relevance * 100)} 
+                  label="Answer Correctness" 
+                  color="#F7C948" 
+                />
+                <CircularGauge 
+                  value={Math.round(scores.retrieval_precision * 100)} 
+                  label="Context Precision" 
+                  color="#8C6A1D" 
+                />
+                <CircularGauge 
+                  value={Math.round(scores.citation_accuracy * 100)} 
+                  label="Citation Accuracy" 
+                  color="#22C55E" 
+                />
+                
+                {/* Hallucination Rate Gauge */}
+                <div className="flex flex-col items-center gap-3 bg-bg-card p-5 rounded-2xl border border-border-custom hover:border-gold/20 transition-all flex-1 min-w-[130px]">
+                  <div className="relative w-[100px] h-[100px]">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="46"
+                        stroke="rgba(24, 24, 24, 0.8)"
+                        strokeWidth="8"
+                        fill="transparent"
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="46"
+                        stroke="#EF4444"
+                        strokeWidth="8"
+                        fill="transparent"
+                        strokeDasharray={289}
+                        strokeDashoffset={289 - (scores.hallucination_rate / 100) * 289}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center font-mono font-bold text-sm text-error-custom">
+                      {scores.hallucination_rate}%
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider text-center leading-tight">
+                    Hallucination Rate
+                  </span>
                 </div>
               </div>
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider text-center leading-tight">
-                Hallucination Rate
-              </span>
+            )}
+
+            {/* Observability explanation */}
+            <div className="p-6 rounded-2xl bg-bg-card border border-border-custom flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shrink-0">
+                <Brain className="w-5 h-5 text-gold" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">Verification Framework Audit Logs</h4>
+                <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
+                  Calculations evaluate overlap between the synthesis response and the source document coordinate segments. Chunks returning Jaccard context proximity scores &lt; 0.6 are marked with citation warnings to detect RAG hallucinations in production.
+                </p>
+              </div>
             </div>
-          </div>
+          </>
         )}
-
-        {/* Charts & Analytics Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* Latency histogram */}
-          <div className="p-6 rounded-2xl bg-bg-card border border-border-custom space-y-4">
-            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5 font-display">
-              <Clock className="w-3.5 h-3.5 text-gold" />
-              Retrieval Latency Distribution
-            </h3>
-            
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsBarChart data={latencyDist} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#181818" />
-                  <XAxis dataKey="range" stroke="#9CA3AF" fontSize={9} tickLine={false} />
-                  <YAxis stroke="#9CA3AF" fontSize={9} tickLine={false} />
-                  <RechartsTooltip
-                    contentStyle={{ background: "#101010", border: "1px solid #222222", borderRadius: "8px" }}
-                    labelStyle={{ color: "#9CA3AF", fontSize: "10px" }}
-                    itemStyle={{ color: "#D4AF37", fontSize: "10px" }}
-                  />
-                  <Bar dataKey="Count" fill="#D4AF37" radius={[4, 4, 0, 0]}>
-                    {latencyDist.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 1 ? "#F7C948" : "#8C6A1D"} />
-                    ))}
-                  </Bar>
-                </RechartsBarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Queries volume trend */}
-          <div className="p-6 rounded-2xl bg-bg-card border border-border-custom space-y-4">
-            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5 font-display">
-              <TrendingUp className="w-3.5 h-3.5 text-gold" />
-              Daily Query Traffic
-            </h3>
-            
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={queriesPerDay} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#181818" />
-                  <XAxis dataKey="date" stroke="#9CA3AF" fontSize={9} tickLine={false} />
-                  <YAxis stroke="#9CA3AF" fontSize={9} tickLine={false} />
-                  <RechartsTooltip
-                    contentStyle={{ background: "#101010", border: "1px solid #222222", borderRadius: "8px" }}
-                    labelStyle={{ color: "#9CA3AF", fontSize: "10px" }}
-                    itemStyle={{ color: "#D4AF37", fontSize: "10px" }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="Queries" 
-                    stroke="#D4AF37" 
-                    strokeWidth={2}
-                    dot={{ stroke: "#D4AF37", strokeWidth: 1, r: 2 }}
-                    activeDot={{ r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* Observability explanation */}
-        <div className="p-6 rounded-2xl bg-bg-card border border-border-custom flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shrink-0">
-            <Brain className="w-5 h-5 text-gold" />
-          </div>
-          <div>
-            <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">Verification Framework Audit Logs</h4>
-            <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
-              Calculations evaluate overlap between the synthesis response and the source document coordinate segments. Chunks returning Jaccard context proximity scores &lt; 0.6 are marked with citation warnings to detect RAG hallucinations in production.
-            </p>
-          </div>
-        </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function EvaluationAnalytics() {
+  return (
+    <Suspense fallback={<div className="p-6 text-xs text-text-muted font-mono animate-pulse">Initializing OS Observability Modules...</div>}>
+      <EvaluationContent />
+    </Suspense>
   );
 }

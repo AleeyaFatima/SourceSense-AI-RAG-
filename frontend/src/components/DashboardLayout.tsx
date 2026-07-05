@@ -29,18 +29,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </button>
       </header>
 
-      {/* Desktop Sidebar Wrapper */}
-      <div className={`fixed inset-y-0 left-0 z-40 transform lg:translate-x-0 transition-transform duration-300 ease-in-out ${
-        isOpen ? "translate-x-0" : "-translate-x-full lg:block"
-      }`}>
+      {/* Desktop Sidebar (Permanent) */}
+      <div className="hidden lg:block w-64 fixed inset-y-0 left-0 z-20 bg-bg-card border-r border-border-custom">
         <Sidebar />
       </div>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Sidebar (Drawer sliding in over header) */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-bg-card border-r border-border-custom transform transition-transform duration-300 ease-in-out lg:hidden ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
+        <div className="relative h-full w-full">
+          {/* Internal close button for mobile view */}
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="absolute top-4 right-4 p-1 rounded-md border border-border-custom bg-bg-surface hover:text-gold lg:hidden z-30"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+          <Sidebar />
+        </div>
+      </div>
+
+      {/* Mobile Overlay Backdrop */}
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black/80 z-30 lg:hidden backdrop-blur-md"
+          className="fixed inset-0 bg-black/85 z-40 lg:hidden backdrop-blur-sm"
         />
       )}
 
