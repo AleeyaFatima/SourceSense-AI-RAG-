@@ -9,11 +9,7 @@ try:
 except ImportError:
     BM25Okapi = None
 
-# Try sentence-transformers for Reranking
-try:
-    from sentence_transformers import CrossEncoder
-except ImportError:
-    CrossEncoder = None
+CrossEncoder = None
 
 from app.core.config import settings
 from app.models.models import Chunk, Document
@@ -27,6 +23,10 @@ def get_reranker_model():
     import os
     # Disable heavy local ML model on memory-constrained Render free tier
     if os.environ.get("ENV") == "production":
+        return None
+    try:
+        from sentence_transformers import CrossEncoder
+    except ImportError:
         return None
     if settings.RERANKER_PROVIDER == "none" or CrossEncoder is None:
         return None

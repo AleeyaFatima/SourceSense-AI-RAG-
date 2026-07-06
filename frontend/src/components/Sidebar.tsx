@@ -47,13 +47,7 @@ export default function Sidebar() {
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "AI Workspace", href: "/chat", icon: MessageSquare },
     { name: "Knowledge Base", href: "/knowledge", icon: Database },
-    { name: "Documents", href: "/knowledge?tab=docs", icon: FolderOpen },
-    { name: "AI Models", href: "/chat?tab=models", icon: Cpu },
-    { name: "Analytics", href: "/evaluation?tab=analytics", icon: LineChart },
-    { name: "Evaluations", href: "/evaluation", icon: Activity },
-    { name: "Retrieval Monitor", href: "/chat?tab=monitor", icon: Search },
-    { name: "Audit Logs", href: "/evaluation?tab=audit", icon: Scroll },
-    { name: "Settings", href: "/chat?tab=settings", icon: Settings },
+    { name: "Platform Analytics", href: "/evaluation", icon: Activity }
   ];
 
   return (

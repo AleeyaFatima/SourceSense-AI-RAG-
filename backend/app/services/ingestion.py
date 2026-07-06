@@ -17,10 +17,7 @@ try:
 except ImportError:
     docx = None
 
-try:
-    from sentence_transformers import SentenceTransformer
-except ImportError:
-    SentenceTransformer = None
+SentenceTransformer = None
 
 try:
     from sklearn.decomposition import PCA
@@ -43,8 +40,12 @@ def get_embedding_model():
         return None
     if settings.EMBEDDING_PROVIDER == "openai":
         return None
-    if SentenceTransformer is None:
+    
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
         return None
+
     if _embedding_model is None:
         try:
             _embedding_model = SentenceTransformer(settings.EMBEDDING_MODEL_NAME)

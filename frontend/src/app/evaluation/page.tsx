@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { 
   BarChart as RechartsBarChart, 
   Bar, 
@@ -214,6 +215,19 @@ function EvaluationContent() {
               Recalculate
             </button>
           </div>
+        </div>
+
+        {/* Active Sub-tab selector */}
+        <div className="py-2 px-4 rounded-xl bg-bg-card border border-border-custom flex items-center gap-2 overflow-x-auto text-[10px] no-scrollbar">
+          <Link href="/evaluation" className={`px-3 py-1 rounded-md transition-all font-semibold ${!tab ? 'bg-gold/10 text-gold border border-gold/20' : 'text-text-muted hover:text-text-primary'}`}>
+            RAGAS Quality Overview
+          </Link>
+          <Link href="/evaluation?tab=analytics" className={`px-3 py-1 rounded-md transition-all font-semibold ${tab === 'analytics' ? 'bg-gold/10 text-gold border border-gold/20' : 'text-text-muted hover:text-text-primary'}`}>
+            Performance Analytics
+          </Link>
+          <Link href="/evaluation?tab=audit" className={`px-3 py-1 rounded-md transition-all font-semibold ${tab === 'audit' ? 'bg-gold/10 text-gold border border-gold/20' : 'text-text-muted hover:text-text-primary'}`}>
+            Observability Audit Logs
+          </Link>
         </div>
 
         {/* Tab Routing */}

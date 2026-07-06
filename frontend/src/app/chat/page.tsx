@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { 
   Send, 
   Bot, 
@@ -496,6 +497,22 @@ function ChatContent() {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Active Sub-tab selector */}
+          <div className="px-6 py-2 bg-bg-surface/30 border-b border-border-custom flex items-center gap-2 overflow-x-auto text-[10px] no-scrollbar">
+            <Link href="/chat" className={`px-3 py-1 rounded-md transition-all font-semibold ${!tab ? 'bg-gold/10 text-gold border border-gold/20' : 'text-text-muted hover:text-text-primary'}`}>
+              Chat Workspace
+            </Link>
+            <Link href="/chat?tab=models" className={`px-3 py-1 rounded-md transition-all font-semibold ${tab === 'models' ? 'bg-gold/10 text-gold border border-gold/20' : 'text-text-muted hover:text-text-primary'}`}>
+              AI Models Core
+            </Link>
+            <Link href="/chat?tab=monitor" className={`px-3 py-1 rounded-md transition-all font-semibold ${tab === 'monitor' ? 'bg-gold/10 text-gold border border-gold/20' : 'text-text-muted hover:text-text-primary'}`}>
+              Pipeline Monitor
+            </Link>
+            <Link href="/chat?tab=settings" className={`px-3 py-1 rounded-md transition-all font-semibold ${tab === 'settings' ? 'bg-gold/10 text-gold border border-gold/20' : 'text-text-muted hover:text-text-primary'}`}>
+              Settings Config
+            </Link>
           </div>
 
           {/* Conditional Render based on the URL Active Tab */}
