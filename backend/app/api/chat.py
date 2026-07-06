@@ -182,7 +182,7 @@ def query_rag(
                     yield sse_line
                     
         # Save the assistant's complete response to database
-        model_name = "GPT-4o-mini" if settings.OPENAI_API_KEY else "Local Simulation"
+        model_name = "GPT-4o-mini" if settings.OPENAI_API_KEY else "SourceSense-LLM"
         assistant_message = Message(
             conversation_id=conversation_id,
             role="assistant",

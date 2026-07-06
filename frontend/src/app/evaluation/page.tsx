@@ -413,7 +413,7 @@ function EvaluationContent() {
 
 export default function EvaluationAnalytics() {
   return (
-    <Suspense fallback={<div className="p-6 text-xs text-text-muted font-mono animate-pulse">Initializing OS Observability Modules...</div>}>
+    <Suspense fallback={<div className="p-6 text-xs text-text-muted font-mono animate-pulse">Loading system modules...</div>}>
       <EvaluationContent />
     </Suspense>
   );

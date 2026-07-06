@@ -61,7 +61,7 @@ export default function Sidebar() {
         </div>
         <div>
           <h1 className="font-display font-bold text-text-primary text-sm tracking-wide">SourceSense AI</h1>
-          <p className="text-[10px] text-gold-hover font-medium tracking-widest uppercase">Knowledge OS</p>
+          <p className="text-[10px] text-gold-hover font-medium tracking-widest uppercase">Enterprise RAG</p>
         </div>
       </div>
 
@@ -129,7 +129,7 @@ export default function Sidebar() {
         </div>
         <div className="flex-1 overflow-hidden">
           <p className="text-[11px] font-bold text-text-primary truncate">Aleeya Fatima</p>
-          <p className="text-[9px] text-gold-muted truncate font-medium">System Developer</p>
+          <p className="text-[9px] text-gold-muted truncate font-medium">AI Engineer</p>
         </div>
       </div>
     </aside>

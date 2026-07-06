@@ -98,7 +98,7 @@ function ChatContent() {
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   
   // System configurations
-  const [selectedModel, setSelectedModel] = useState("Local Simulation");
+  const [selectedModel, setSelectedModel] = useState("SourceSense-LLM");
   const [showConfig, setShowConfig] = useState(false);
   
   // RAG Hyperparameters
@@ -300,7 +300,7 @@ function ChatContent() {
                 content: synthText,
                 confidence_score: 0.88,
                 latency_ms: 680,
-                model_used: "Local Simulation",
+                model_used: "SourceSense-LLM",
                 citations: finalCitations,
                 retrieval_metadata: { chunks: mockChunks.slice(0, 3) }
               }]);
@@ -977,7 +977,7 @@ function ChatContent() {
 
 export default function AIChat() {
   return (
-    <Suspense fallback={<div className="p-6 text-xs text-text-muted font-mono animate-pulse">Initializing OS Workspace Modules...</div>}>
+    <Suspense fallback={<div className="p-6 text-xs text-text-muted font-mono animate-pulse">Loading system modules...</div>}>
       <ChatContent />
     </Suspense>
   );

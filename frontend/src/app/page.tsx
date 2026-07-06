@@ -105,6 +105,7 @@ export default function DashboardHome() {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeStage, setActiveStage] = useState<string | null>(null);
+  const [recentDocs, setRecentDocs] = useState<any[]>([]);
 
   // Stats values
   const [stats, setStats] = useState({
@@ -120,6 +121,8 @@ export default function DashboardHome() {
 
   const checkBackend = () => {
     setLoading(true);
+    
+    // Fetch dashboard summary stats
     fetch(`${API_BASE}/api/analytics/dashboard`)
       .then(res => {
         if (!res.ok) throw new Error();
@@ -140,6 +143,24 @@ export default function DashboardHome() {
       .catch(() => {
         setIsDemoMode(true);
         setLoading(false);
+      });
+
+    // Fetch dynamic documents list
+    fetch(`${API_BASE}/api/documents/`)
+      .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(data => {
+        setRecentDocs(data.slice(0, 4));
+      })
+      .catch(() => {
+        setRecentDocs([
+          { id: 1, title: "NovaCorp API Authentication Guide", file_type: "md", status: "ready" },
+          { id: 2, title: "NovaCorp Data Privacy Security Policy", file_type: "md", status: "ready" },
+          { id: 3, title: "NovaCorp Employee Onboarding Policy", file_type: "md", status: "ready" },
+          { id: 4, title: "NovaCorp Engineering Team Handbook", file_type: "md", status: "ready" }
+        ]);
       });
   };
 
@@ -174,7 +195,7 @@ export default function DashboardHome() {
               className="p-1.5 rounded-lg border border-border-custom bg-bg-card hover:bg-bg-surface hover:text-gold transition-all text-xs flex items-center gap-1.5 text-text-muted"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              Sync OS
+              Sync Data
             </button>
           </div>
         </div>
@@ -190,25 +211,12 @@ export default function DashboardHome() {
               <div className="absolute top-4 left-4 z-10">
                 <h3 className="text-xs font-semibold text-text-primary flex items-center gap-1.5 font-display">
                   <span className="w-2 h-2 rounded-full bg-gold animate-ping" />
-                  Knowledge Space Coordinates
+                  Document Semantic Projection
                 </h3>
-                <p className="text-[10px] text-text-muted mt-0.5">Real-time query segment distance mapping.</p>
+                <p className="text-[10px] text-text-muted mt-0.5">Visual mapping of document vector coordinates.</p>
               </div>
 
-              {/* Simulation triggers for testing flows */}
-              <div className="absolute top-4 right-4 z-10 flex gap-1.5">
-                <button
-                  onClick={() => {
-                    setActiveStage("dense");
-                    setTimeout(() => setActiveStage("rerank"), 1000);
-                    setTimeout(() => setActiveStage("verify"), 2000);
-                    setTimeout(() => setActiveStage(null), 3000);
-                  }}
-                  className="px-2 py-1 rounded border border-gold/20 bg-gold/5 text-[9px] font-bold text-gold hover:bg-gold/10 transition-colors"
-                >
-                  Pulse Flow
-                </button>
-              </div>
+
 
               {/* The interactive sphere canvas */}
               <div className="flex-1 min-h-[260px] w-full flex items-center justify-center">
@@ -271,9 +279,9 @@ export default function DashboardHome() {
               <div>
                 <h3 className="text-xs font-semibold text-text-primary uppercase tracking-wider flex items-center gap-1.5 font-display">
                   <Activity className="w-3.5 h-3.5 text-gold" />
-                  Right Intelligence diagnostics
+                  Model Configuration
                 </h3>
-                <p className="text-[9px] text-text-muted mt-0.5">Live vector parser instrumentation logs.</p>
+                <p className="text-[9px] text-text-muted mt-0.5">Active models and pipeline status.</p>
               </div>
 
               {/* Info Matrix */}
@@ -301,8 +309,8 @@ export default function DashboardHome() {
                   </span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-bg-surface/50 border border-border-custom/40">
-                  <span className="text-text-muted text-[8px] uppercase block mb-0.5">Token processing</span>
-                  <span className="text-text-primary font-semibold">2,391 t/q</span>
+                  <span className="text-text-muted text-[8px] uppercase block mb-0.5">Tokens/Query</span>
+                  <span className="text-text-primary font-semibold">2,391</span>
                 </div>
               </div>
             </div>
@@ -330,34 +338,36 @@ export default function DashboardHome() {
               </div>
             </div>
 
-            {/* Git-like Activity Timeline */}
+            {/* Dynamic Recent Documents list */}
             <div className="p-5 rounded-2xl bg-bg-card border border-border-custom/80 flex-1 flex flex-col justify-between space-y-3">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block flex items-center gap-1">
-                <History className="w-3.5 h-3.5 text-gold-muted" />
-                Operational Event Timeline
-              </span>
+              <div>
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider block flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5 text-gold-muted" />
+                  Recent Documents
+                </span>
+                <p className="text-[8px] text-text-muted mt-0.5">Indexed files in Qdrant namespace.</p>
+              </div>
               
-              <div className="relative pl-4 space-y-3 border-l border-border-custom/80 mt-1 flex-1">
-                <div className="relative text-[10px]">
-                  <div className="absolute -left-[20px] top-0.5 w-2.5 h-2.5 rounded-full bg-gold border-2 border-bg-card" />
-                  <span className="text-text-muted font-mono text-[9px] block">09:30 UTC</span>
-                  <span className="text-text-primary font-semibold">Startup Document Ingest indexed 3 manuals</span>
-                </div>
-                <div className="relative text-[10px]">
-                  <div className="absolute -left-[20px] top-0.5 w-2.5 h-2.5 rounded-full bg-success-custom border-2 border-bg-card" />
-                  <span className="text-text-muted font-mono text-[9px] block">09:42 UTC</span>
-                  <span className="text-text-primary font-semibold">RAGAS Quality evaluations logging check completed</span>
-                </div>
-                <div className="relative text-[10px]">
-                  <div className="absolute -left-[20px] top-0.5 w-2.5 h-2.5 rounded-full bg-gold-muted border-2 border-bg-card" />
-                  <span className="text-text-muted font-mono text-[9px] block">10:11 UTC</span>
-                  <span className="text-text-primary font-semibold">Knowledge base vector projections recalculated</span>
-                </div>
-                <div className="relative text-[10px]">
-                  <div className="absolute -left-[20px] top-0.5 w-2.5 h-2.5 rounded-full bg-success-custom border-2 border-bg-card" />
-                  <span className="text-text-muted font-mono text-[9px] block">10:47 UTC</span>
-                  <span className="text-text-primary font-semibold">Autonomic citation verification parameters passed</span>
-                </div>
+              <div className="space-y-2 mt-1 flex-1">
+                {recentDocs.map((doc, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 rounded bg-bg-primary/40 border border-border-custom/40 text-[10px]">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="w-3.5 h-3.5 text-gold shrink-0" />
+                      <span className="text-text-primary font-semibold truncate max-w-[140px]" title={doc.title}>
+                        {doc.title}
+                      </span>
+                    </div>
+                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-mono ${
+                      doc.status === "ready" 
+                        ? "bg-success-custom/10 text-success-custom border border-success-custom/25" 
+                        : doc.status === "processing"
+                        ? "bg-warning-custom/10 text-warning-custom border border-warning-custom/25 animate-pulse"
+                        : "bg-error-custom/10 text-error-custom border border-error-custom/25"
+                    }`}>
+                      {doc.status}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

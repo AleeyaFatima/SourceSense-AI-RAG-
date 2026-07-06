@@ -26,6 +26,8 @@ import {
 
 import DashboardLayout from "@/components/DashboardLayout";
 
+const colors = ["#D4AF37", "#F7C948", "#C59B27", "#8C6A1D", "#A57C1B", "#E5C158"];
+
 // Demo/Fallback Data
 const MOCK_DOCUMENTS = [
   { id: 1, title: "SourceSense-RAG-Framework-Architecture", file_type: "pdf", page_count: 8, chunk_count: 36, status: "ready", created_at: new Date(Date.now() - 1000*3600*24).toISOString() },
