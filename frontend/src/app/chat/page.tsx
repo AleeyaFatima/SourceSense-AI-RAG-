@@ -75,6 +75,7 @@ const getMockChunks = (docId: number) => {
 };
 
 function ChatContent() {
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
 
@@ -124,7 +125,7 @@ function ChatContent() {
 
   // Load conversations list
   const loadConversations = (selectFirst = false) => {
-    fetch("http://localhost:8000/api/chat/conversations")
+    fetch(`${API_BASE}/api/chat/conversations`)
       .then(res => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -182,7 +183,7 @@ function ChatContent() {
       return;
     }
     
-    fetch(`http://localhost:8000/api/chat/conversations/${activeConvId}/messages`)
+    fetch(`${API_BASE}/api/chat/conversations/${activeConvId}/messages`)
       .then(res => res.json())
       .then(data => {
         setMessages(data);
@@ -202,7 +203,7 @@ function ChatContent() {
       return;
     }
     
-    fetch("http://localhost:8000/api/chat/conversations", {
+    fetch(`${API_BASE}/api/chat/conversations`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: "New Conversation" })
@@ -314,7 +315,7 @@ function ChatContent() {
     }
     
     const encodedQuery = encodeURIComponent(queryStr);
-    const url = `http://localhost:8000/api/chat/query?conversation_id=${activeConvId}&query=${encodedQuery}`;
+    const url = `${API_BASE}/api/chat/query?conversation_id=${activeConvId}&query=${encodedQuery}`;
     const eventSource = new EventSource(url);
     
     eventSource.onmessage = (event) => {
@@ -348,7 +349,7 @@ function ChatContent() {
         setConfidenceScore(data.confidence_score);
         setLatencyMs(data.latency_ms);
         
-        fetch(`http://localhost:8000/api/chat/conversations/${activeConvId}/messages`)
+        fetch(`${API_BASE}/api/chat/conversations/${activeConvId}/messages`)
           .then(res => res.json())
           .then(msgs => {
             setMessages(msgs);

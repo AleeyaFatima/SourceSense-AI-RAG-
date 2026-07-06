@@ -58,6 +58,7 @@ const getMockChunks = (docId: number) => {
 };
 
 export default function KnowledgeBase() {
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [documents, setDocuments] = useState(MOCK_DOCUMENTS);
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
   const [chunks, setChunks] = useState<any[]>([]);
@@ -71,7 +72,7 @@ export default function KnowledgeBase() {
 
   const fetchDocuments = () => {
     setLoadingDocs(true);
-    fetch("http://localhost:8000/api/documents/")
+    fetch(`${API_BASE}/api/documents/`)
       .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -109,7 +110,7 @@ export default function KnowledgeBase() {
       return;
     }
     
-    fetch(`http://localhost:8000/api/documents/${selectedDoc.id}/chunks`)
+    fetch(`${API_BASE}/api/documents/${selectedDoc.id}/chunks`)
       .then(res => res.json())
       .then(data => {
         setChunks(data);
@@ -160,7 +161,7 @@ export default function KnowledgeBase() {
     const formData = new FormData();
     formData.append("file", file);
     
-    fetch("http://localhost:8000/api/documents/upload", {
+    fetch(`${API_BASE}/api/documents/upload`, {
       method: "POST",
       body: formData
     })
@@ -203,7 +204,7 @@ export default function KnowledgeBase() {
       return;
     }
     
-    fetch(`http://localhost:8000/api/documents/${docId}`, {
+    fetch(`${API_BASE}/api/documents/${docId}`, {
       method: "DELETE"
     })
       .then(() => fetchDocuments())

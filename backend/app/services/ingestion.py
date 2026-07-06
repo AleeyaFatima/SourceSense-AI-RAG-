@@ -19,10 +19,7 @@ except ImportError:
 
 SentenceTransformer = None
 
-try:
-    from sklearn.decomposition import PCA
-except ImportError:
-    PCA = None
+PCA = None
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
@@ -264,8 +261,9 @@ def project_embeddings_2d(embeddings: List[List[float]]) -> List[Tuple[float, fl
         return [(-1.0, 0.0), (1.0, 0.0)]
         
     # PCA Method
-    if PCA is not None:
+    if os.environ.get("ENV") != "production":
         try:
+            from sklearn.decomposition import PCA
             X = np.array(embeddings)
             n_comp = min(2, num_embeddings)
             pca = PCA(n_components=n_comp, random_state=42)

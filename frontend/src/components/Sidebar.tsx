@@ -26,8 +26,10 @@ export default function Sidebar() {
     embedding_model: "checking..."
   });
 
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   useEffect(() => {
-    fetch("http://localhost:8000/api/analytics/dashboard")
+    fetch(`${API_BASE}/api/analytics/dashboard`)
       .then(res => res.json())
       .then(data => {
         if (data.system_status) {

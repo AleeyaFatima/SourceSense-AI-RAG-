@@ -137,6 +137,7 @@ const MOCK_AUDITS = [
 ];
 
 function EvaluationContent() {
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
 
@@ -151,7 +152,7 @@ function EvaluationContent() {
 
   const fetchAnalyticsData = () => {
     setLoading(true);
-    fetch("http://localhost:8000/api/analytics/charts")
+    fetch(`${API_BASE}/api/analytics/charts`)
       .then(res => {
         if (!res.ok) throw new Error();
         return res.json();

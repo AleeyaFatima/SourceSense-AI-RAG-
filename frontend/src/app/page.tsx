@@ -105,9 +105,11 @@ export default function DashboardHome() {
     latencyMs: 432
   });
 
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   const checkBackend = () => {
     setLoading(true);
-    fetch("http://localhost:8000/api/analytics/dashboard")
+    fetch(`${API_BASE}/api/analytics/dashboard`)
       .then(res => {
         if (!res.ok) throw new Error();
         return res.json();
