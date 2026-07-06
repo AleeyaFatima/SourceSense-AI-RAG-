@@ -28,7 +28,10 @@ import {
   XAxis, 
   YAxis, 
   Tooltip,
-  CartesianGrid
+  CartesianGrid,
+  BarChart as RechartsBarChart,
+  Bar,
+  Cell
 } from "recharts";
 
 import DashboardLayout from "@/components/DashboardLayout";
@@ -88,6 +91,14 @@ const WEEKLY_PERFORMANCE = [
   { day: "Fri", confidence: 95 },
   { day: "Sat", confidence: 96 },
   { day: "Sun", confidence: 97 }
+];
+
+const MOCK_LATENCY_DATA = [
+  { range: "0-100ms", Count: 14 },
+  { range: "100-250ms", Count: 38 },
+  { range: "250-500ms", Count: 72 },
+  { range: "500ms-1s", Count: 18 },
+  { range: "1s+", Count: 5 }
 ];
 
 export default function DashboardHome() {
@@ -179,9 +190,9 @@ export default function DashboardHome() {
               <div className="absolute top-4 left-4 z-10">
                 <h3 className="text-xs font-semibold text-text-primary flex items-center gap-1.5 font-display">
                   <span className="w-2 h-2 rounded-full bg-gold animate-ping" />
-                  3D AI Knowledge Core
+                  Knowledge Space Coordinates
                 </h3>
-                <p className="text-[10px] text-text-muted mt-0.5">Interactive index projection mapping semantic vectors.</p>
+                <p className="text-[10px] text-text-muted mt-0.5">Real-time query segment distance mapping.</p>
               </div>
 
               {/* Simulation triggers for testing flows */}
@@ -355,47 +366,87 @@ export default function DashboardHome() {
         {/* Bottom Section: RAG Weekly performance overview and About Platform description card */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           
-          {/* Chart block (Col span 2) */}
-          <div className="lg:col-span-2 p-6 rounded-2xl bg-bg-card border border-border-custom/80 space-y-4">
-            <div>
-              <h3 className="font-display font-bold text-sm text-text-primary">AI Performance Overview</h3>
-              <p className="text-[10px] text-text-muted">Weekly RAG citation verification confidence percentage logs (Mon-Sun).</p>
-            </div>
+          {/* Chart blocks (Col span 2) */}
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            <div className="h-44 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={WEEKLY_PERFORMANCE} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="glowConfidence" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.25}/>
-                      <stop offset="95%" stopColor="#D4AF37" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#181818" />
-                  <XAxis dataKey="day" stroke="#9CA3AF" fontSize={9} tickLine={false} />
-                  <YAxis stroke="#9CA3AF" fontSize={9} tickLine={false} domain={[50, 100]} />
-                  <Tooltip 
-                    contentStyle={{ background: "#101010", border: "1px solid #222222", borderRadius: "8px" }}
-                    labelStyle={{ color: "#9CA3AF", fontSize: "10px", fontFamily: "var(--font-display)" }}
-                    itemStyle={{ color: "#D4AF37", fontSize: "10px" }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="confidence" 
-                    stroke="#D4AF37" 
-                    fillOpacity={1} 
-                    fill="url(#glowConfidence)" 
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+            {/* Weekly performance */}
+            <div className="p-5 rounded-2xl bg-bg-card border border-border-custom/80 space-y-3 flex flex-col justify-between">
+              <div>
+                <h3 className="font-display font-bold text-xs text-text-primary">System Performance</h3>
+                <p className="text-[9px] text-text-muted">Weekly RAG citation verification confidence percentage logs.</p>
+              </div>
+              
+              <div className="h-36 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={WEEKLY_PERFORMANCE} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="glowConfidence" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#D4AF37" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#181818" />
+                    <XAxis dataKey="day" stroke="#9CA3AF" fontSize={8} tickLine={false} />
+                    <YAxis stroke="#9CA3AF" fontSize={8} tickLine={false} domain={[50, 100]} />
+                    <Tooltip 
+                      contentStyle={{ background: "#101010", border: "1px solid #222222", borderRadius: "8px" }}
+                      labelStyle={{ color: "#9CA3AF", fontSize: "9px" }}
+                      itemStyle={{ color: "#D4AF37", fontSize: "9px" }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="confidence" 
+                      stroke="#D4AF37" 
+                      fillOpacity={1} 
+                      fill="url(#glowConfidence)" 
+                      strokeWidth={1.5}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="flex justify-between items-center pt-2 text-[9px] text-text-muted border-t border-border-custom/40">
+                <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-success-custom" /> Retrieval Rate: 98.4%</span>
+                <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-gold" /> Index Growth: +14 Today</span>
+              </div>
             </div>
-            
-            <div className="flex justify-between items-center pt-2 text-[10px] text-text-muted border-t border-border-custom/40">
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success-custom" /> Retrieval Rate: 98.4%</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success-custom" /> Hallucination Rate: 1.3%</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-gold" /> Index Growth: +14 Today</span>
+
+            {/* Latency Histogram */}
+            <div className="p-5 rounded-2xl bg-bg-card border border-border-custom/80 space-y-3 flex flex-col justify-between">
+              <div>
+                <h3 className="font-display font-bold text-xs text-text-primary flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-gold-muted" />
+                  Retrieval Latency Histogram
+                </h3>
+                <p className="text-[9px] text-text-muted">Real-time latency frequency distributions.</p>
+              </div>
+              
+              <div className="h-36 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsBarChart data={MOCK_LATENCY_DATA} margin={{ top: 5, right: 5, left: -30, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#181818" />
+                    <XAxis dataKey="range" stroke="#9CA3AF" fontSize={8} tickLine={false} />
+                    <YAxis stroke="#9CA3AF" fontSize={8} tickLine={false} />
+                    <Tooltip 
+                      contentStyle={{ background: "#101010", border: "1px solid #222222", borderRadius: "8px" }}
+                      labelStyle={{ color: "#9CA3AF", fontSize: "9px" }}
+                      itemStyle={{ color: "#D4AF37", fontSize: "9px" }}
+                    />
+                    <Bar dataKey="Count" fill="#D4AF37" radius={[3, 3, 0, 0]}>
+                      {MOCK_LATENCY_DATA.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === 2 ? "#F7C948" : "#8C6A1D"} />
+                      ))}
+                    </Bar>
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="flex justify-between items-center pt-2 text-[9px] text-text-muted border-t border-border-custom/40">
+                <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-success-custom" /> Hallucination Rate: 1.3%</span>
+                <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-gold" /> Avg Latency: 320 ms</span>
+              </div>
             </div>
+
           </div>
 
           {/* About Project card crediting Aleeya Fatima */}
